@@ -14,7 +14,6 @@ basically i need to define exactly what i want to build have (a music player is 
     - a gui to control the app (no more CLI commands)
         - ofc with skip/pause/prev/next
         - organizing playlists n shi
-        - maybe tagging
         - installing/modifying/listening/deleting music
 
     - a music installer, paste the link (song audio youtube) and get the audio only
