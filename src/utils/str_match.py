@@ -106,6 +106,17 @@ class SongTitleData:
         self.song_name = self.song_name.strip()
 
 
+    def has_err_code(self) -> bool:
+        """checks if it has some kind of errcode
+
+        required because the default might change + i don't like exposing class logic, i like to encapsulate logic
+
+        Returns:
+            bool: returns True if it has received an error code
+        """
+        return self.err_code != ErrCodes.NONE
+
+
     def validate_fields(self):
         if len(self.authors) == 0:
             self.err_code = ErrCodes.NO_AUTHOR_WARNING
