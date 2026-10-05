@@ -580,3 +580,8 @@ def test_big_dataset():
 
         assert eq
         passed += 1
+
+
+def test_error_code_check():
+    assert process_title("song1 but no separator author").has_err_code()
+
