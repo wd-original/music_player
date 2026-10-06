@@ -85,7 +85,7 @@ def write_data(path: str, data):
     f.close()
 
 
-# TODO: move these into a separate file_crud file
+# TODO: move these into a separate file_crud file, or rename this file
 def clear_file(path: str):
     """file become empty
     """
@@ -93,8 +93,14 @@ def clear_file(path: str):
         pass
 
 def file_empty(path: str):
-    if not os.path.exists(path):
+    """also checks if file exists in general
+    """
+    if not file_exists(path=path):
         return False
     
     return os.path.getsize(path) == 0
+
+
+def file_exists(path: str):
+    return os.path.isfile(path=path)
 
