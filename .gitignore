@@ -17,3 +17,7 @@ python-for-cpp-devs.md
 
 # ignore temporary test/sample files
 temp_*
+
+# yt-dlp documentation summary
+dev/yt-dlp-audio-guide.md
+dev/audio_installer_explained.md

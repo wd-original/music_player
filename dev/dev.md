@@ -1,5 +1,7 @@
 
 
+last task id #9, next one you insert will be that one +1
+
 # done
 - ### a string matching function assembly
 - [X] add a basic string matching using levenshtein's algorithm
@@ -21,13 +23,20 @@
 
     - ### a db object/the whole db logic implemented
 
+
 # second phase
 - ## music installer
     - just a youtube link -> .mp3 file somewhere + metadata in db, jus a song
+        - [ ] #8 make a way to store downloaded audio, as now it is in rigid hardcoded full paths, make it also cross platform valid, for now it does not matter, when youre at like cross platform stuff, youll need it
+        - [ ] #9 install&switch nightly version of `yt-dlp`
+        - [ ] #10 document audio files types and make a script to get the best conversion not just only to mp3
 
 - ## music player 
     - just 1 song playing on another thread
     - though could be expanded to a small `playing_list` object
+
+- [ ] #11 rename str_match (stuff inside isnt only match stuff) also rename a bunch of other stuff
+- [ ] #12 move src/includes/db_fields into src/utils
 
 
 # open issues (use github for that, though these are small)
