@@ -21,21 +21,23 @@ DEFAULT_TEMP_DIR="/home/wd/projects/my-utils/music_utility/downloads/temp"
 @dataclass
 class DownloadReturnMetadata:
     title: str
+    filepath: str
     # in future thumbnail, channel name, views and idk other stuff
 
 
-def fetch_url(url: str, out_dir=DEFAULT_OUT_DIR, temp_out_dir=DEFAULT_TEMP_DIR, 
-                download=False, codec="mp3", quality="192", playlist=False) -> list:
+def fetch_url(url: str, out_dir=DEFAULT_OUT_DIR, temp_out_dir=DEFAULT_TEMP_DIR, download=False, 
+                codec="mp3", quality="192", playlist=False, output_name: str="") -> list[DownloadReturnMetadata]:
     """fetches the url, and returns an array of entries that you can work on in future
 
     Args:
         url (str): url of the video
-        out_dir (_type_, optional): where to download the audio (if download true). Defaults to DEFAULT_OUT_DIR.
-        temp_out_dir (_type_, optional): where to write temp files (skip this one, they are still deleted). Defaults to DEFAULT_TEMP_DIR.
+        out_dir (str, optional): where to download the audio (if download true). Defaults to DEFAULT_OUT_DIR.
+        temp_out_dir (str, optional): where to write temp files (skip this one, they are still deleted). Defaults to DEFAULT_TEMP_DIR.
         download (bool, optional): to download the video audio file. Defaults to False.
         codec (str, optional): what type to save&||convert the file to. Defaults to "mp3".
         quality (str, optional): quality of the audio/bitrate. Defaults to "192".
         playlist (bool, optional): whether it is a playlist?. Defaults to False.
+        output_name (str, optional): with what name to save the file. Defaults to empty str.
 
     Raises:
         RuntimeError: on a faild download
@@ -50,7 +52,8 @@ def fetch_url(url: str, out_dir=DEFAULT_OUT_DIR, temp_out_dir=DEFAULT_TEMP_DIR,
             "home": out_dir,  # where the audio file will end up
             "temp": temp_out_dir  # while downloading it creates a bunch of temp files
         },
-        "outtmpl": "%(title|NO_TITLE).150B [%(id)s].%(ext)s",   # .150B = cap title at 150 bytes
+        # .150B = cap title at 150 bytes
+        "outtmpl": f"{'%(title|NO_TITLE).150B [%(id)s]' if not output_name else output_name}.%(ext)s",
         "windowsfilenames": True,     # safe filenames on every OS
         "noplaylist": not playlist,   # URL with video+list -> just the video
         "writethumbnail": True,       # needed for EmbedThumbnail
@@ -70,47 +73,25 @@ def fetch_url(url: str, out_dir=DEFAULT_OUT_DIR, temp_out_dir=DEFAULT_TEMP_DIR,
     }
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
-            # TODO: optionally think of splittiong into 2 functions, 1 using `exctract_info`, another `download`
             info = ydl.extract_info(url, download=download)
     except DownloadError as e:
         raise RuntimeError(f"yt-dlp failed: {e}") from e
 
     # here info contains a dict of a lot of metadata of the video, almost everything you might need
 
-    return info.get("entries") or [info]  # playlist -> many, video -> one
+    entries = info.get("entries") or [info]  # playlist -> many, video -> one
 
+    # TODO: idk how to make this more pythonic
+    res = []
+    for entry in entries: 
+        title = entry["title"]
+        path = f"{out_dir}/{output_name}.{codec}" if output_name else ""
+        if download and entry:
+            for downloaded_file in entry.get("requested_downloads", []):
+                path = downloaded_file["filepath"] if downloaded_file and path else ""
+        res.append(DownloadReturnMetadata(title=title, filepath=path))
 
-def download_audio(url: str) -> list[str]:
-    """Download audio from `url`.
-
-    Args:
-        url (str): the url to fetch
-
-    Returns:
-        list[str]: a list of final file paths.
-    """
-
-    return [d["filepath"] for e in fetch_url(url=url, download=True) if e for d in e.get("requested_downloads", [])]
-
-
-def get_audio_metadata(url: str) -> list[DownloadReturnMetadata]:
-    """
-    fetches the audio url and returns data about the audiofile
-
-    Args:
-        url (str): the url of the video
-
-    Returns:
-        list[DownloadReturnMetadata]: a list of bundles with video's data
-    """
-
-    return [
-        DownloadReturnMetadata(
-            title=entry["title"]
-            # add more properties here
-        )
-        for entry in fetch_url(url=url, download=False)
-    ]
+    return res
 
 
 
