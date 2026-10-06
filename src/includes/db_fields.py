@@ -95,6 +95,7 @@ class SongRecord:
     represents a record that can be added to the db, data containing the new data
     """
     def __init__(self, init_data: dict = {}):
+        # TODO: make it somehow read only for outside code
         self.__data: dict = SongFields.get_default_record()
 
         # for no initialization data, this wont execute

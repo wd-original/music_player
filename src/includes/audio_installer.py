@@ -10,6 +10,7 @@ the use of literals here is caused by the yt_dlp module, its not my bad coding p
 import yt_dlp
 from yt_dlp.utils import DownloadError
 from dataclasses import dataclass
+from includes.db_fields import SongFields
 
 
 sample_track_url = "https://youtu.be/VsiaEw9KOLw?si=W3p54aOwuknwIiK2"
@@ -24,6 +25,17 @@ class DownloadReturnMetadata:
     filepath: str
     # in future thumbnail, channel name, views and idk other stuff
 
+    def get_as_dict(self) -> dict:
+        """returns the collected data as a dictionary you can add into database
+
+        Returns:
+            dict: keys from SongFields with this instance's values
+        """
+        return {
+            SongFields.song_name: self.title,
+            SongFields.audio_path: self.filepath
+        }
+
 
 def fetch_url(url: str, out_dir=DEFAULT_OUT_DIR, temp_out_dir=DEFAULT_TEMP_DIR, download=False, 
                 codec="mp3", quality="192", playlist=False, output_name: str="") -> list[DownloadReturnMetadata]:
@@ -37,7 +49,7 @@ def fetch_url(url: str, out_dir=DEFAULT_OUT_DIR, temp_out_dir=DEFAULT_TEMP_DIR, 
         codec (str, optional): what type to save&||convert the file to. Defaults to "mp3".
         quality (str, optional): quality of the audio/bitrate. Defaults to "192".
         playlist (bool, optional): whether it is a playlist?. Defaults to False.
-        output_name (str, optional): with what name to save the file. Defaults to empty str.
+        output_name (str, optional): with what name to save the file, use in testing only. Defaults to empty str.
 
     Raises:
         RuntimeError: on a faild download

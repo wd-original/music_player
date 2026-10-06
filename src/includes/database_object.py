@@ -3,9 +3,9 @@
 """
 
 
-import src.utils.json_crud as j_crud
+import utils.json_crud as j_crud
 
-from src.includes.db_fields import SongRecord, SongFields
+from includes.db_fields import SongRecord, SongFields
 
 from functools import cache
 
