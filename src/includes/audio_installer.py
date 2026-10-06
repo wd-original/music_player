@@ -10,7 +10,7 @@ the use of literals here is caused by the yt_dlp module, its not my bad coding p
 import yt_dlp
 from yt_dlp.utils import DownloadError
 from dataclasses import dataclass
-from includes.db_fields import SongFields
+from includes.db_fields import SongFields, SongRecord
 
 
 sample_track_url = "https://youtu.be/VsiaEw9KOLw?si=W3p54aOwuknwIiK2"
@@ -19,26 +19,8 @@ DEFAULT_OUT_DIR="/home/wd/projects/my-utils/music_utility/downloads"
 DEFAULT_TEMP_DIR="/home/wd/projects/my-utils/music_utility/downloads/temp"
 
 
-@dataclass
-class DownloadReturnMetadata:
-    title: str
-    filepath: str
-    # in future thumbnail, channel name, views and idk other stuff
-
-    def get_as_dict(self) -> dict:
-        """returns the collected data as a dictionary you can add into database
-
-        Returns:
-            dict: keys from SongFields with this instance's values
-        """
-        return {
-            SongFields.song_name: self.title,
-            SongFields.audio_path: self.filepath
-        }
-
-
 def fetch_url(url: str, out_dir=DEFAULT_OUT_DIR, temp_out_dir=DEFAULT_TEMP_DIR, download=False, 
-                codec="mp3", quality="192", playlist=False, output_name: str="") -> list[DownloadReturnMetadata]:
+                codec="mp3", quality="192", playlist=False, output_name: str="") -> list[SongRecord]:
     """fetches the url, and returns an array of entries that you can work on in future
 
     Args:
@@ -94,14 +76,21 @@ def fetch_url(url: str, out_dir=DEFAULT_OUT_DIR, temp_out_dir=DEFAULT_TEMP_DIR, 
     entries = info.get("entries") or [info]  # playlist -> many, video -> one
 
     # TODO: idk how to make this more pythonic
-    res = []
+    res: list[SongRecord] = []
     for entry in entries: 
-        title = entry["title"]
-        path = f"{out_dir}/{output_name}.{codec}" if output_name else ""
-        if download and entry:
+        song_data = SongRecord({
+            SongFields.raw_title.name: entry.get("title", ""),
+            SongFields.link.name: url
+        })
+        # CAREFULL this only works for a single video, not for a playlist
+        if download:
+            path: str = ""
             for downloaded_file in entry.get("requested_downloads", []):
-                path = downloaded_file["filepath"] if downloaded_file and path else ""
-        res.append(DownloadReturnMetadata(title=title, filepath=path))
+                path = f"{out_dir}/{output_name}.{codec}" if output_name else downloaded_file["filepath"] if downloaded_file and path else ""
+            song_data.set_data({
+                SongFields.audio_path.name: path
+            })
+        res.append(song_data)
 
     return res
 

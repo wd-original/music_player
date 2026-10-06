@@ -259,7 +259,7 @@ def test_remove_multiple():
 # can add 1 remove 2 edit 3 read of 4
 def test_all_crud():
     limit: int = 3
-    edit_fields = [[fields.SongFields.link, "htttps://"], [fields.SongFields.likes, 33], [fields.SongFields.featuring, ["a", "b"]]]
+    edit_fields = [[fields.SongFields.link.name, "htttps://"], [fields.SongFields.likes.name, 33], [fields.SongFields.featuring.name, ["a", "b"]]]
     
     expected: dict = {}
     

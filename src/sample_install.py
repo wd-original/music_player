@@ -2,10 +2,10 @@
 temp file with how the future download of a song protocol will look
 """
 
-from includes.audio_installer import fetch_url, DownloadReturnMetadata
+from includes.audio_installer import fetch_url
 from includes.database_object import DatabaseObject
 from utils.str_match import process_title, SongTitleData, str_match, MatchStatus
-from includes.db_fields import SongFields
+from includes.db_fields import SongFields, SongRecord
 
 
 # a small test example on how this should look in future
@@ -19,7 +19,7 @@ def sample_install():
 
     # 2. get title
     for record in data:
-        title_data = process_title(record.title)
+        title_data = process_title(record.get_data()[SongFields.raw_title.name])
 
         if title_data.has_err_code():
             print(f"got err code: '{title_data.err_code}'")
@@ -27,7 +27,7 @@ def sample_install():
 
         # 3. check if in db or if any errcodes
         for idx in db.get_indexes():
-            match_status = str_match(title_data.song_name, db.get_song_data(idx)[SongFields.song_name])
+            match_status = str_match(title_data.song_name, db.get_song_data(idx)[SongFields.song_name.name])
 
             match match_status:
                 case MatchStatus.MATCH:
@@ -47,7 +47,7 @@ def sample_install():
 
     # 5. add to db with all data (author title url path)
     for song in data:
-        db.add_song(song.get_as_dict())
+        db.add_song(song.get_data())
 
     db.save_data()
 

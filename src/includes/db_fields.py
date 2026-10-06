@@ -89,7 +89,7 @@ class SongFields:
         """
         return field_name in SongFields.fields()
 
-
+@dataclass
 class SongRecord:
     """
     represents a record that can be added to the db, data containing the new data
@@ -108,3 +108,15 @@ class SongRecord:
 
     def get_data(self):
         return self.__data
+
+
+    def set_data(self, new_data: dict):
+        """used to change data recorded here
+
+        Args:
+            new_data (dict): new data to be modified, invalid fieldnames are ignored
+        """
+        for key, value in new_data.items():
+            if SongFields.field_valid(key):
+                self.__data[key] = value
+
