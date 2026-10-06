@@ -13,6 +13,7 @@ from collections.abc import Callable
 
 
 # after 17 characters we warn the user about possible name invalidity
+# TODO: still rethink this value, do some ai finu-tuning if needed
 MAX_AUTHOR_LENGTH: int = 17
 
 class ErrCodes(Enum):
@@ -75,10 +76,11 @@ title_separators = [" - ", " — ", " – "]
 
 
 class SongTitleData:
-    authors: list[str] = []
-    featuring_artists: list[str] = []
-    song_name: str = ""
-    err_code: str = ErrCodes.NONE
+    # think this makes them static
+    # authors: list[str] = []
+    # featuring_artists: list[str] = []
+    # song_name: str = ""
+    # err_code: str = ErrCodes.NONE
 
     def __init__(self, authors: list[str], feats: list[str], song_name, err_code=ErrCodes.NONE):
         self.authors = authors
@@ -246,7 +248,7 @@ def get_artists_list(names_raw: str, song_data: SongTitleData) -> list[str]:
 
     return names
 
-
+# @deprecated?
 def check_refuse_patterns(data: SongTitleData, raw_str: str) -> bool:
     for pattern in refuse_patterns:
         if pattern in raw_str:
@@ -254,6 +256,41 @@ def check_refuse_patterns(data: SongTitleData, raw_str: str) -> bool:
             return True
 
     return False
+
+# TODO: we return magic numbers, make a struct here
+def collect_feats(target: str, song_data: SongTitleData, found_action: Callable[[int, int, str, SongTitleData], None], 
+                aditional_checks: Callable[[int], bool]=lambda x: x==x) -> int:
+    """collects featurings
+
+    Args:
+        target (str): checks for patterns here
+        found_action (Callable[[int, int, str]]): what it does on a found feat. ft. etc, use with get_artists_lists, second argument is match length
+        aditional_checks (_type_, optional): aditional checks for feats, takes the found index of ft. Defaults to lambda x:x==x.
+
+    Returns:
+        int: the start of featuring pattern found, 
+        or -1 if pattern is not found, 
+        -2 if the structure contains patterns we refuse
+    """
+
+    # initial check if song was refused
+    if song_data.err_code == ErrCodes.REFUSED:
+        return -2
+
+    for pattern in featuring_patterns:
+        i = target.find(pattern)
+        if i != -1 and aditional_checks(i):
+            found_action(i, len(pattern), target, song_data)
+
+            # check if this was refused
+            if song_data.err_code == ErrCodes.REFUSED:
+                return -2
+            
+            # quit after finding feats
+            # return feat pattern start
+            return i
+
+    return -1
 
 
 def process_title(title: str) -> SongTitleData:
@@ -345,39 +382,4 @@ def process_title(title: str) -> SongTitleData:
     data.validate_fields()
 
     return data
-
-# TODO: we return magic numbers, make a struct here
-def collect_feats(target: str, song_data: SongTitleData, found_action: Callable[[int, int, str, SongTitleData], None], 
-                aditional_checks: Callable[[int], bool]=lambda x: x==x) -> int:
-    """collects featurings
-
-    Args:
-        target (str): checks for patterns here
-        found_action (Callable[[int, int, str]]): what it does on a found feat. ft. etc, use with get_artists_lists, second argument is match length
-        aditional_checks (_type_, optional): aditional checks for feats, takes the found index of ft. Defaults to lambda x:x==x.
-
-    Returns:
-        int: the start of featuring pattern found, 
-        or -1 if pattern is not found, 
-        -2 if the structure contains patterns we refuse
-    """
-
-    # initial check if song was refused
-    if song_data.err_code == ErrCodes.REFUSED:
-        return -2
-
-    for pattern in featuring_patterns:
-        i = target.find(pattern)
-        if i != -1 and aditional_checks(i):
-            found_action(i, len(pattern), target, song_data)
-
-            # check if this was refused
-            if song_data.err_code == ErrCodes.REFUSED:
-                return -2
-            
-            # quit after finding feats
-            # return feat pattern start
-            return i
-
-    return -1
 
