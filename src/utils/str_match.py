@@ -10,6 +10,7 @@ a file where i write string match functions
 from enum import Enum, auto  # aparently enums in python need to be imported
 from Levenshtein import distance
 from collections.abc import Callable
+from includes.db_fields import SongFields
 
 
 # after 17 characters we warn the user about possible name invalidity
@@ -82,6 +83,7 @@ class SongTitleData:
     # song_name: str = ""
     # err_code: str = ErrCodes.NONE
 
+    # TODO: song_name is a str?
     def __init__(self, authors: list[str], feats: list[str], song_name, err_code=ErrCodes.NONE):
         self.authors = authors
         self.featuring_artists = feats
@@ -117,6 +119,19 @@ class SongTitleData:
             bool: returns True if it has received an error code
         """
         return self.err_code != ErrCodes.NONE
+
+
+    def get_data(self) -> dict:
+        """returns all data as a dictionary that can be used in db work
+
+        Returns:
+            dict: all fields with according SOngFields names and acording values of this instance
+        """
+        return {
+            SongFields.song_name.name: self.song_name,
+            SongFields.featuring.name: self.featuring_artists,
+            SongFields.authors.name: self.authors
+        }
 
 
     def validate_fields(self):

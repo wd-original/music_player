@@ -41,7 +41,7 @@ class SongFields:
     featuring: Final[DatabaseField] = DatabaseField("featuring", [""])
     channels: Final[DatabaseField] = DatabaseField("channels", [""])
     audio_path: Final[DatabaseField] = DatabaseField("audio path", "")
-    image_path: Final[DatabaseField] = DatabaseField("image path", "")
+    # image_path: Final[DatabaseField] = DatabaseField("image path", "")
 
     # TODO: this should be nested in metadata, but is in plain mixed with everything else
     # come up with some way to get nested fields

@@ -330,5 +330,7 @@ def test_add_remove():
     assert j_crud.read_data(TEST_DB_PATH) == expected
     j_crud.clear_file(TEST_DB_PATH)
 
-
+# TODO:
+# add tests:
+# check if can add existing
 

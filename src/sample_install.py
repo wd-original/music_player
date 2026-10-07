@@ -41,17 +41,16 @@ def sample_install():
                     pass
                 case _:
                     print("Error dev added a new match status but forgot to record it sample_install.py")
+        record.set_data(title_data.get_data())
 
     # 4. get audio (add check if audio file exists already)
-    data = fetch_url(url=sample_url, download=True)
+    data = fetch_url(url=sample_url, download=True, result_list=data)
 
     # 5. add to db with all data (author title url path)
     for song in data:
         db.add_song(song.get_data())
 
     db.save_data()
-
-    # make tests for dis
 
 sample_install()
 

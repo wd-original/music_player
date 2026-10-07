@@ -32,7 +32,7 @@ last task id #9, next one you insert will be that one +1
         - [ ] #10 document audio files types and make a script to get the best conversion not just only to mp3
 
 - ## music player 
-    - just 1 song playing on another thread
+    - just 1 song playing
     - though could be expanded to a small `playing_list` object
 
 - [ ] #11 rename str_match (stuff inside isnt only match stuff) also rename a bunch of other stuff

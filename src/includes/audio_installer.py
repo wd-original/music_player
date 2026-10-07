@@ -20,7 +20,8 @@ DEFAULT_TEMP_DIR="/home/wd/projects/my-utils/music_utility/downloads/temp"
 
 
 def fetch_url(url: str, out_dir=DEFAULT_OUT_DIR, temp_out_dir=DEFAULT_TEMP_DIR, download=False, 
-                codec="mp3", quality="192", playlist=False, output_name: str="") -> list[SongRecord]:
+                codec="mp3", quality="192", playlist=False, output_name: str="", 
+                result_list: list[SongRecord]=[]) -> list[SongRecord]:
     """fetches the url, and returns an array of entries that you can work on in future
 
     Args:
@@ -40,6 +41,10 @@ def fetch_url(url: str, out_dir=DEFAULT_OUT_DIR, temp_out_dir=DEFAULT_TEMP_DIR, 
     Returns:
         list: a list of entries containing a lot of metatada
     """
+
+    if download and not result_list:
+        print("Warning we are downloading but no fetch metadata result list given")
+
     opts = {
         "format": "bestaudio/best",
         "paths": {
@@ -76,23 +81,28 @@ def fetch_url(url: str, out_dir=DEFAULT_OUT_DIR, temp_out_dir=DEFAULT_TEMP_DIR, 
     entries = info.get("entries") or [info]  # playlist -> many, video -> one
 
     # TODO: idk how to make this more pythonic
-    res: list[SongRecord] = []
+    i = 0
     for entry in entries: 
-        song_data = SongRecord({
-            SongFields.raw_title.name: entry.get("title", ""),
-            SongFields.link.name: url
-        })
-        # CAREFULL this only works for a single video, not for a playlist
+        # TODO: CAREFULL this only works for a single video, not for a playlist
         if download:
             path: str = ""
             for downloaded_file in entry.get("requested_downloads", []):
-                path = f"{out_dir}/{output_name}.{codec}" if output_name else downloaded_file["filepath"] if downloaded_file and path else ""
-            song_data.set_data({
+                path = f"{out_dir}/{output_name}.{codec}" if output_name else downloaded_file["filepath"] if downloaded_file and not path else ""
+            data = {
                 SongFields.audio_path.name: path
-            })
-        res.append(song_data)
+            }
+            if result_list:
+                result_list[i].set_data(data)
+            else:
+                result_list.append(SongRecord(data))
+        else:
+            result_list.append(SongRecord({
+                SongFields.raw_title.name: entry.get("title", ""),
+                SongFields.link.name: url
+            }))
+        i += 1
 
-    return res
+    return result_list
 
 
 
